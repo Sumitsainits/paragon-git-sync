@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Grocery } from '../entities/grocery';
-import { In, MoreThan, Repository } from 'typeorm';
-import { Order } from '../entities/order';
-import { OrderItems } from '../entities/orderItems';
+import { Grocery } from '../../entities/grocery';
+import { EntityManager, MoreThan, Repository } from 'typeorm';
+import { Order } from '../../entities/order';
+import { OrderItems } from '../../entities/orderItems';
 
 @Injectable()
 export class GroceryService {
@@ -49,35 +49,40 @@ export class GroceryService {
     lineItems: { groceryItemId: string; quantity: number }[];
   }) {
     let orderTotal: number = 0;
+    const { customerName, lineItems } = dto;
 
-    const orderItems = await Promise.all(
-      dto.lineItems.map(async (lineItem) => {
-        const groceryItem = await this.groceryRepo.findOneBy({
-          id: lineItem.groceryItemId,
+    return this.orderRepo.manager.transaction<Order>(
+      async (orderRepoManager: EntityManager) => {
+        const orderItems = await Promise.all(
+          lineItems.map(async (lineItem) => {
+            const groceryItem = await this.groceryRepo.findOneBy({
+              id: lineItem.groceryItemId,
+            });
+            if (!groceryItem) {
+              throw new NotFoundException(
+                `Grocery item with ID ${lineItem.groceryItemId} not found`,
+              );
+            }
+
+            orderTotal += groceryItem.price * lineItem.quantity;
+
+            return this.orderItemsRepo.create({
+              ...lineItem,
+              totalPrice: groceryItem.price * lineItem.quantity,
+            });
+          }),
+        );
+
+        const order = this.orderRepo.create({
+          customerName,
+          orderTotal,
+          orderItems,
         });
-        if (!groceryItem) {
-          throw new NotFoundException(
-            `Grocery item with ID ${lineItem.groceryItemId} not found`,
-          );
-        }
 
-        orderTotal += groceryItem.price * lineItem.quantity;
+        await orderRepoManager.save(order);
 
-        return this.orderItemsRepo.create({
-          ...lineItem,
-          totalPrice: groceryItem.price * lineItem.quantity,
-        });
-      }),
+        return order;
+      },
     );
-
-    const order = this.orderRepo.create({
-      customerName: dto.customerName,
-      orderTotal,
-    });
-
-    await this.orderRepo.save(order);
-    await this.orderItemsRepo.save(orderItems);
-
-    return { ...order, orderItems };
   }
 }

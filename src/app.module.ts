@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { GroceryModule } from './grocery/grocery.module';
+import { GroceryModule } from './modules/grocery/grocery.module';
 
 @Module({
   imports: [GroceryModule],
