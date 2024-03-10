@@ -7,14 +7,17 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { GroceryService } from './grocery.service';
+import { AdminAuthGuard } from 'src/guards/AdminAuthGuard';
 
 @Controller('grocery')
 export class GroceryController {
   constructor(private groceryService: GroceryService) {}
 
   @Post('item')
+  @UseGuards(AdminAuthGuard)
   async createGroceryItem(@Body() dto: any) {
     return this.groceryService.createGroceryItem(dto);
   }
@@ -29,11 +32,13 @@ export class GroceryController {
   }
 
   @Delete('item/:itemId')
+  @UseGuards(AdminAuthGuard)
   async deleteGroceryItem(@Param('itemId') itemId: string) {
     return this.groceryService.deleteGroceryItem(itemId);
   }
 
   @Patch('item/:itemId')
+  @UseGuards(AdminAuthGuard)
   async updateGroceryItem(@Param('itemId') itemId: string, @Body() dto: any) {
     return this.groceryService.updateGroceryItem(itemId, dto);
   }

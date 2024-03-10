@@ -68,6 +68,7 @@ export class GroceryService {
 
             return this.orderItemsRepo.create({
               ...lineItem,
+              groceryItemId: groceryItem.id,
               totalPrice: groceryItem.price * lineItem.quantity,
             });
           }),
