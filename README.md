@@ -40,11 +40,11 @@ POSTGRES_PASSWORD=
 PGADMIN_DEFAULT_EMAIL=<optional>
 PGADMIN_DEFAULT_PASSWORD=<optional>
 
-# install docker desktop and run in your terminal
+# install docker desktop and run the following cmd in your terminal
 $ npm run infra
 
 # run migrations to set up database schema
-npm run build && npm run migration:run
+$ npm run build && npm run migration:run
 ```
 
 ## Running the app
