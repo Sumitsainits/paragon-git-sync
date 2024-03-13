@@ -10,7 +10,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { GroceryService } from './grocery.service';
-import { AdminAuthGuard } from 'src/guards/AdminAuthGuard';
+import { AdminAuthGuard } from '../../guards/AdminAuthGuard';
+import { CreateGroceryDto, UpdateGroceryDto } from '../../dto/grocery';
+import { CreateOrderDto } from '../../dto/order';
 
 @Controller('grocery')
 export class GroceryController {
@@ -18,7 +20,7 @@ export class GroceryController {
 
   @Post('item')
   @UseGuards(AdminAuthGuard)
-  async createGroceryItem(@Body() dto: any) {
+  async createGroceryItem(@Body() dto: CreateGroceryDto) {
     return this.groceryService.createGroceryItem(dto);
   }
 
@@ -39,12 +41,15 @@ export class GroceryController {
 
   @Patch('item/:itemId')
   @UseGuards(AdminAuthGuard)
-  async updateGroceryItem(@Param('itemId') itemId: string, @Body() dto: any) {
+  async updateGroceryItem(
+    @Param('itemId') itemId: string,
+    @Body() dto: UpdateGroceryDto,
+  ) {
     return this.groceryService.updateGroceryItem(itemId, dto);
   }
 
   @Post('/orders')
-  async createOrder(@Body() dto: any) {
+  async createOrder(@Body() dto: CreateOrderDto) {
     return this.groceryService.createOrder(dto);
   }
 }

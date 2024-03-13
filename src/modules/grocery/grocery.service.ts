@@ -4,6 +4,8 @@ import { Grocery } from '../../entities/grocery';
 import { EntityManager, MoreThan, Repository } from 'typeorm';
 import { Order } from '../../entities/order';
 import { OrderItems } from '../../entities/orderItems';
+import { CreateGroceryDto, UpdateGroceryDto } from '../../dto/grocery';
+import { CreateOrderDto } from '../../dto/order';
 
 @Injectable()
 export class GroceryService {
@@ -15,7 +17,7 @@ export class GroceryService {
     private readonly orderItemsRepo: Repository<OrderItems>,
   ) {}
 
-  async createGroceryItem(dto: any) {
+  async createGroceryItem(dto: CreateGroceryDto) {
     const groceryItem = this.groceryRepo.create(dto);
     return this.groceryRepo.save(groceryItem);
   }
@@ -29,7 +31,7 @@ export class GroceryService {
     return this.groceryRepo.softDelete(itemId);
   }
 
-  async updateGroceryItem(itemId: string, dto: any) {
+  async updateGroceryItem(itemId: string, dto: UpdateGroceryDto) {
     const groceryItem = await this.groceryRepo.findOneBy({ id: itemId });
     if (!groceryItem) {
       throw new NotFoundException('Grocery item not found with given id.');
@@ -44,10 +46,7 @@ export class GroceryService {
     );
   }
 
-  async createOrder(dto: {
-    customerName: string;
-    lineItems: { groceryItemId: string; quantity: number }[];
-  }) {
+  async createOrder(dto: CreateOrderDto) {
     let orderTotal: number = 0;
     const { customerName, lineItems } = dto;
 
